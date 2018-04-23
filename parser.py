@@ -2,11 +2,7 @@
 
 import sys
 from indent import Indent
-
-# coding: utf-8
-
-import sys
-from indent import Indent
+from random import *
 
 TYPE = ['ENTIER', 'CARACTERE', 'FLOTTANT']
 STATEMENT_STARTERS = []
@@ -26,6 +22,7 @@ class Parser:
         self.tokens = []
         self.errors = 0
 
+
     def show_next(self, n=1):
         try:
             return self.tokens[n - 1]
@@ -33,25 +30,29 @@ class Parser:
             print('ERROR: no more tokens left!')
             sys.exit(1)
 
+    def generate_error(self):
+        chaine_ret = "Erreur :"
+        for i in range(0,85):
+            chaine_ret += chr(randint(33,126))
+        print(chaine_ret)
+        sys.exit(1)
+        
+
     def expect(self, kind):
         if type(kind) == list:
             actualToken = self.show_next()
             actualKind = actualToken.kind
-            actualPosition = actualToken.position
             if actualKind in kind:
                 return self.accept_it()
             else:
-                print('Error at {}: expected {}, got {} instead'.format(str(actualPosition), kind, actualKind))
-                sys.exit(1)
+                self.generate_error()
         else:
             actualToken = self.show_next()
             actualKind = actualToken.kind
-            actualPosition = actualToken.position
             if actualKind == kind:
                 return self.accept_it()
             else:
-                print('Error at {}: expected {}, got {} instead'.format(str(actualPosition), kind, actualKind))
-                sys.exit(1)
+                self.generate_error()
 
     # same as expect() but no error if not correct kind
     def maybe(self, kind):
@@ -83,7 +84,18 @@ class Parser:
     def parse(self, tokens):
         self.tokens = tokens
         self.tokens = self.remove_comments()
+        self.calcul_politesse(tokens)
         self.parse_program()
+
+    def calcul_politesse(self, tokens):
+        nombrePlease = 0
+        for i in tokens:
+            if(i=="please"):
+                nombrePlease+=1
+        ratio = nombrePlease / len(tokens)
+        if(ratio < 0.05 or ratio > 0.2):
+            self.generate_error()
+        
 
     #PARSE DU PROGRAMME
     def parse_program(self):
@@ -242,11 +254,9 @@ class Parser:
                 elif(self.show_next().kind == 'IDENTIFIER'):
                     self.accept_it()
                 else:
-                    print('Error parse expressions')
-                    sys.exit(1)
+                    self.generate_error()
             else :
-                print('Error at parse expressions')
-                sys.exit(1)
+                self.generate_error()
         elif(self.show_next().kind == 'IDENTIFIER'):
             self.accept_it()
             if(self.show_next().kind in REL_OP):
@@ -256,11 +266,9 @@ class Parser:
                 elif(self.show_next().kind == 'IDENTIFIER'):
                     self.accept_it()
                 else:
-                    print('Error at parse expressions')
-                    sys.exit(1)
+                    self.generate_error()
         else:
-            print('Error at parse expression')
-            sys.exit(1)
+            self.generate_error()
         self.indentator.dedent()
 
     #PARSE UNE ASSIGNATION (ex : a = a * 2)
@@ -280,8 +288,7 @@ class Parser:
             self.accept_it()
         self.expect('SEMICOLON')
         if(cpt_parentheses != 0):
-            print('Error at parse assignement : unbalanced parenthesis')
-            sys.exit(1)
+            self.generate_error()
         self.indentator.dedent()
 
     def parse_structures(self):
@@ -306,8 +313,7 @@ class Parser:
                         if self.show_next().kind in TYPE or self.show_next().kind == 'IDENTIFIER':
                             self.accept_it()
                         else:
-                            print('Erreur avec unsigned et le type de variable')
-                            sys.exit(1)
+                            self.generate_error()
                     else:
                         self.accept_it()
             self.expect('SEMICOLON')
