@@ -5,15 +5,15 @@ from indent import Indent
 from random import *
 
 TYPE = ['ENTIER', 'CARACTERE', 'FLOTTANT']
-STATEMENT_STARTERS = []
-REL_OP = []
-OP = []
-ASSIGN = []
-LITERAL = []
-PAREN = []
-BRACKET = []
-MORE = []
-BREAKER = []
+FUNCTYPE =  ['ENTIER', 'CARACTERE', 'FLOTTANT', '2BE3']
+STATEMENT_STARTERS = ['POUR', 'TANTQUE', 'ENFONCTIONDE', 'SI', 'SINON']
+REL_OP = ['ESTIL', 'DIFFERENT', 'PPQ', 'SPPQ', 'SPGQ', 'SPPQ']
+OP = ['PLUSUN', 'MOINSUN', 'PLUS', 'MOINS', 'AJOUT', 'ENLEVE']
+ASSIGN = ['EST']
+LITERAL = ['ENTIER_LIT', 'FLOTTANT_LIT', 'CARACTERE_LIT']
+PAREN = ['LPAREN', 'RPAREN']
+MORE = ['STRUCTURE']
+BREAKER = ['']
 
 class Parser:
 
@@ -36,7 +36,7 @@ class Parser:
             chaine_ret += chr(randint(33,126))
         print(chaine_ret)
         sys.exit(1)
-        
+
 
     def expect(self, kind):
         if type(kind) == list:
@@ -95,7 +95,7 @@ class Parser:
         ratio = nombrePlease / len(tokens)
         if(ratio < 0.05 or ratio > 0.2):
             self.generate_error()
-        
+
 
     #PARSE DU PROGRAMME
     def parse_program(self):
