@@ -6,14 +6,14 @@ from random import *
 
 TYPE = ['ENTIER', 'CARACTERE', 'FLOTTANT']
 FUNCTYPE =  ['ENTIER', 'CARACTERE', 'FLOTTANT', '2BE3']
-STATEMENT_STARTERS = ['POUR', 'TANTQUE', 'ENFONCTIONDE', 'SI', 'SINON']
+STATEMENT_STARTERS = ['POUR', 'TANTQUE', 'ENFONCTIONDE', 'SI', 'SINON', 'CAS', 'PARDEFAUT']
 REL_OP = ['ESTIL', 'DIFFERENT', 'PPQ', 'SPPQ', 'SPGQ', 'SPPQ']
 OP = ['PLUSUN', 'MOINSUN', 'PLUS', 'MOINS', 'AJOUT', 'ENLEVE']
 ASSIGN = ['EST']
 LITERAL = ['ENTIER_LIT', 'FLOTTANT_LIT', 'CARACTERE_LIT']
 PAREN = ['LPAREN', 'RPAREN']
-MORE = ['STRUCTURE']
-BREAKER = ['']
+MORE = ['STRUCTURE', 'DEFINITION', 'TAILLE', 'ET', 'OU']
+BREAKER = ['RENVOIE']
 
 class Parser:
 
@@ -94,7 +94,8 @@ class Parser:
                 nombrePlease+=1
         ratio = nombrePlease / len(tokens)
         if(ratio < 0.05 or ratio > 0.2):
-            self.generate_error()
+            #self.generate_error()
+            pass
 
 
     #PARSE DU PROGRAMME
@@ -107,16 +108,25 @@ class Parser:
         ###
 
         #réservé au main
-        self.expect('INT')
+        self.expect('ENTIER')
         self.expect('IDENTIFIER')
         self.expect('LPAREN')
         self.expect('RPAREN')
-        self.expect('LBRACE')
+        self.expect('LPAREN')
+        #print(self.show_next())
+        if (self.show_next().kind=='VIRGULE'):
+            self.accept_it()
+            self.expect('PLEASE')
+        self.expect('POINT')
+        #print(self.show_next())
+
 
         self.parse_declarations()
+
         self.parse_statements()
 
-        self.expect('RBRACE')
+        self.expect('RPAREN')
+        self.expect('POINT')
         self.indentator.dedent()
         if (self.errors == 1):
             print('WARNING: 1 error found!')
@@ -130,6 +140,7 @@ class Parser:
         self.indentator.indent('Parsing Declarations')
         while (self.show_next().kind in TYPE):
             self.parse_declaration()
+            #self.expect('POINT')
         self.indentator.dedent()
 
     #PARSE UNE DECLARATION
@@ -137,23 +148,23 @@ class Parser:
         self.indentator.indent('Parsing Declaration')
         self.expect(TYPE)
         self.expect('IDENTIFIER')
-        if self.show_next().kind == 'LBRACKET':
+        if self.show_next().kind == 'LPAREN':
             self.accept_it()
-            self.expect('INTEGER_LIT')
-            self.expect('RBRACKET')
-        while self.show_next().kind == 'COMMA':
+            self.expect('ENTIER_LIT')
+            self.expect('RPAREN')
+        while self.show_next().kind == 'POINTVIRGULE':
             self.accept_it()
             self.expect('IDENTIFIER')
-            if self.show_next().kind == 'LBRACKET':
+            if self.show_next().kind == 'LPAREN':
                 self.accept_it()
-                self.expect('INTEGER_LIT')
-                self.expect('RBRACKET')
-        self.expect('SEMICOLON')
+                self.expect('ENTIER_LIT')
+                self.expect('RPAREN')
+        self.expect('POINT')
         self.indentator.dedent()
 
     #PARSE UN ENSEMBLE DE STATEMENTS
     def parse_statements(self):
-        while (self.show_next().kind in STATEMENT_STARTERS or self.show_next().kind in BREAKER):
+        while (self.show_next().kind in STATEMENT_STARTERS or self.show_next().kind in BREAKER or self.show_next().kind == 'VIRGULE'):
             self.indentator.indent('Parsing statements')
             self.parse_statement()
             self.indentator.dedent()
@@ -162,10 +173,17 @@ class Parser:
     #PARSE UN STATEMENT
     def parse_statement(self):
         self.indentator.indent('Parsing Statement')
-        if(self.show_next().kind == 'SEMICOLON'):
-            self.accept_it()
 
-        elif(self.show_next().kind == 'LBRACE'):
+        if(self.show_next().kind == 'POINT'):
+            self.accept_it()
+        if(self.show_next().kind == 'RPAREN'):
+            self.accept_it()
+            self.expect('POINT')
+        if(self.show_next().kind == 'VIRGULE'):
+            self.accept_it()
+            self.expect('PLEASE')
+            self.expect('POINT')
+        elif(self.show_next().kind == 'LPAREN'):
             self.accept_it()
             self.parse_block()
 
@@ -176,40 +194,49 @@ class Parser:
         elif(self.show_next().kind in BREAKER):
             self.parse_breaker()
 
-        elif(self.show_next().kind == 'IF'):
+        elif(self.show_next().kind == 'SI'):
             self.parse_if()
-            while(self.show_next().kind in STATEMENT_STARTERS or self.show_next().kind in BREAKER):
+            while(self.show_next().kind in STATEMENT_STARTERS or self.show_next().kind in BREAKER or self.show_next().kind == 'IDENTIFIER' or self.show_next().kind == 'POINT'):
                 self.parse_statement()
-            self.expect('RBRACE')
-            if(self.show_next().kind == 'ELSE'):
+            self.expect('RPAREN')
+            self.expect('POINT')
+            if(self.show_next().kind == 'SINON'):
                 self.accept_it()
-                if(self.show_next().kind == 'LBRACE'):
+                if(self.show_next().kind == 'LPAREN'):
                     self.accept_it()
                     while(self.show_next().kind in STATEMENT_STARTERS):
                         self.parse_statement()
-                elif(self.show_next().kind == 'IF'):
+                elif(self.show_next().kind == 'SI'):
                     self.parse_if()
                     while(self.show_next().kind in STATEMENT_STARTERS):
                         self.parse_statement()
 
-        elif(self.show_next().kind == 'WHILE'):
+        elif(self.show_next().kind == 'TANTQUE'):
             self.parse_while()
-            while(self.show_next().kind in STATEMENT_STARTERS):
+            while(self.show_next().kind in STATEMENT_STARTERS or self.show_next().kind=='IDENTIFIER'):
                 self.parse_statement()
-            self.expect('RBRACE')
+            #print('===|>', self.show_next())
+            self.expect('RPAREN')
+            self.expect('POINT')
+            #print(self.show_next())
 
         else:
             print('Error parse statement')
             sys.exit(1)
-
+        """
+        print("---")
+        print(self.show_next())
+        print(self.show_next(2))
+        print("---")
+        """
         self.indentator.dedent()
 
     #PARSE UN BLOCK
     def parse_block(self):
         self.indentator.indent('Parsing block')
-        self.expect('LBRACE')
+        self.expect('LPAREN')
         self.parse_statements()
-        self.expect('RBRACE')
+        self.expect('RPAREN')
         self.indentator.dedent()
 
     #PARSE CONDITION IF
@@ -219,7 +246,8 @@ class Parser:
         self.expect('LPAREN')
         self.parse_expressions()
         self.expect('RPAREN')
-        self.expect('LBRACE')
+        self.expect('LPAREN')
+        self.expect('POINT')
         self.indentator.dedent()
 
     #PARSE BOUCLE WHILE
@@ -228,9 +256,9 @@ class Parser:
         self.accept_it()
         self.expect('LPAREN')
         self.parse_expressions()
-
         self.expect('RPAREN')
-        self.expect('LBRACE')
+        self.expect('LPAREN')
+        self.expect('POINT')
         self.indentator.dedent()
 
     def parse_expressions(self):
@@ -275,31 +303,29 @@ class Parser:
     def parse_assignement(self):
         self.indentator.indent('Parsing assignement')
         cpt_parentheses = 0 #compteur qui va nous servir a detecter un "unbalanced parenthesis"
-        if (self.show_next().kind == 'LBRACKET'):
-            self.accept_it()
-            self.expect('INTEGER_LIT')
-            self.expect('RBRACKET')
-        self.expect('ASSIGN')
         while (self.show_next().kind in OP or self.show_next().kind in LITERAL or self.show_next().kind in PAREN or self.show_next().kind == 'IDENTIFIER'):
             if(self.show_next().kind == 'LPAREN'):
                 cpt_parentheses += 1
             elif(self.show_next().kind == 'RPAREN'):
                 cpt_parentheses -= 1
             self.accept_it()
-        self.expect('SEMICOLON')
+        if self.show_next().kind=='VIRGULE':
+            self.accept_it()
+            self.expect('PLEASE')
+        self.expect('POINT')
         if(cpt_parentheses != 0):
             self.generate_error()
         self.indentator.dedent()
 
     def parse_structures(self):
         self.indentator.indent('Parsing structures')
-        while (self.show_next().kind == 'STRUCT'):
-            self.expect('STRUCT')
+        while (self.show_next().kind == 'STRUCTURE'):
+            self.expect('STRUCTURE')
             self.expect('IDENTIFIER')
-            self.expect('LBRACE')
+            self.expect('LPAREN')
             self.parse_declarations()
-            self.expect('RBRACE')
-            self.expect('SEMICOLON')
+            self.expect('RPAREN')
+            self.expect('POINT')
         self.indentator.dedent()
 
     def parse_typedefs(self):

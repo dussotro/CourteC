@@ -13,12 +13,12 @@ regexExpressions = [
     (r'Definition\b', 'DEFINITION'),
     (r'Pour\b', 'POUR'),
     (r'Tantque\b', 'TANTQUE'),
-    (r'taille\b', 'TAILLE'),
+    (r'taille\b', 'TAILLE'), #sizeof
     (r'EnFonctionDe\b', 'ENFONCTIONDE'),
     (r'cas\b', 'CAS'),
     (r'ParDefaut\b', 'PARDEFAUT'),
     (r'Faire\b', 'FAIRE'),
-    (r'2Be3\b', '2BE3'),
+    (r'2Be3\b', '2BE3'), #void
     (r'Sinon\b', 'SINON'),
     (r'Si\b', 'SI'),
     (r'si\b', 'SI'),
@@ -31,7 +31,7 @@ regexExpressions = [
     (r'\/\=\=\>', 'LCOMMENT'),
     (r'\<\=\=\/', 'RCOMMENT'),
     (r'\.', 'POINT'),
-    (r'estil\b', 'EQ'),
+    (r'estil\b', 'ESTIL'),
     (r'est\b', 'ASSIGN'),
     (r'plusun\b', 'PLUSUN'),
     (r'plus\b', 'PLUS'),

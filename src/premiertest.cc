@@ -6,11 +6,13 @@ Entier main()(, please.
     Caractere lil(8).
     Flottant lul.
 
-    Tantque (a inferieur 4 et b estil 6)(
+    Tantque (a ppq 4 et b estil 6)(.
         i plusun , please.
     ).
 
-    Tantque (a inferieur 4)(
-      .
+    Si (a sppq 4 et b spgq 6)(.
+      i plusun , please.
+      i plus a , please.
     ).
+
 ).
