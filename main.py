@@ -24,5 +24,6 @@ if __name__ == '__main__':
     tokens = lexer.lex(testFileData)
     print(tokens)
     verbose = True
-    #parser = Parser(verbose)
-    #parser.parse(tokens)
+    parser = Parser(verbose)
+    parser.parse(tokens)
+    print(parser)
